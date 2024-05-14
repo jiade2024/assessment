@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Store List Page</title>
+
+    <link rel="stylesheet" href="/css/common.css" />
+    <link rel="stylesheet" href="/css/adminStore.css" />
+</head>
+<body>
+
+<div class="container">
+    <h2>Store List Management</h2>
+    <div class="flex-row flex-space-between top-toolbar">
+        <button class="btn btn-primary btn-add">Add New</button>
+        <div class="flex-row flex-align-center">
+            <span class="label-text">Store Category: </span>
+            <select class="input-text select-store-category">
+                <option value="">All</option>
+                <th:block th:each="storeCategory: ${storeCategoryList}">
+                    <option th:if="${storeCategory.categoryId.equals(category)}" selected="selected" th:text="${storeCategory.title}" th:value="${storeCategory.categoryId}"></option>
+                    <option th:unless="${storeCategory.categoryId.equals(category)}" th:text="${storeCategory.title}" th:value="${storeCategory.categoryId}"></option>
+                </th:block>
+            </select>
+            <span class="label-text margin-left-normal">Keyword: </span>
+            <input type="text" class="input-text keyword" th:value="${keyword}" placeholder="input keyword...">
+            <button class="btn btn-primary margin-left-normal btn-search">Search</button>
+        </div>
+    </div>
+    <table class="margin-top-normal store-table">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Email</th>
+            <th>Image</th>
+            <th>Category</th>
+            <th>Address</th>
+            <th>Geolocation</th>
+            <th>Operation</th>
+        </tr>
+        <tr th:each="store : ${storeList}">
+            <td th:text="${store.name}" th:id="'name-'+${store.storeId}" />
+            <td th:text="${store.description}" th:id="'description-'+${store.storeId}" />
+            <td th:text="${store.email}" th:id="'email-'+${store.storeId}" />
+            <td>
+                <img class="store-image" th:src="'data:image/png;base64,' + ${store.image}" th:id="'image-'+${store.storeId}" />
+            </td>
+            <td>
+                <input type="hidden" th:id="'category-'+${store.storeId}" th:value="${store.categoryId}">
+                <span th:text="${store.category}" th:class="'category-'+${store.storeId}"></span>
+            </td>
+            <td th:text="${store.address}" th:id="'address-'+${store.storeId}" />
+            <td th:text="${store.geolocation}" th:id="'geolocation-'+${store.storeId}" />
+            <td>
+                <div class="flex-row flex-content-justify-center">
+                    <div class="icon-view margin-left-small" th:id="'view-' + ${store.storeId}">
+                        <div class="move-title">View</div>
+                    </div>
+                    <div class="icon-edit margin-left-small" th:id="'edit-' + ${store.storeId}">
+                        <div class="move-title">Edit</div>
+                    </div>
+                    <div class="icon-delete margin-left-small" th:id="'delete-' + ${store.storeId}">
+                        <div class="move-title">Delete</div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="8" class="align-center">
+                <span th:text="'Total Pages: ' + ${totalPages}" />
+                <span th:text="'current Page: ' + ${pageIndex}"></span>
+                <a th:href="'/admin/store?pageIndex=1&pageSize=4&keyword='+${keyword}+'&category='+${category}"><<</a>
+                <a th:if="${pageIndex>1}"
+                   th:href="'/admin/store?pageIndex='+${pageIndex-1}+'&pageSize=4&keyword='+${keyword}+'&category='+${category}">&lt;</a>
+                <a th:if="${pageIndex<totalPages}"
+                   th:href="'/admin/store?pageIndex='+${pageIndex+1}+'&pageSize=4&keyword='+${keyword}+'&category='+${category}">&gt;</a>
+                <a th:href="'/admin/store?pageIndex='+${totalPages}+'&pageSize=4&keyword='+${keyword}+'&category='+${category}">>></a>
+                <span>Go to page:
+                    <select class="paginate-select">
+                        <th:block th:each="i : ${#numbers.sequence(1,totalPages)}">
+                            <option th:if="${i == pageIndex}" th:value="${i}" th:text="${i}" selected="selected" />
+                            <option th:unless="${i == pageIndex}" th:value="${i}" th:text="${i}" />
+                        </th:block>
+                    </select>
+                </span>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="bg-shadow bg-add-store">
+    <div class="container-add-store">
+        <img class="close-image close-add-panel" src="/img/remove-color.png" />
+        <h3 class="align-center">Add Store</h3>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Name: </span>
+            <div class="flex-column">
+                <input type="text" id="store-add-name" placeholder="input store name" class="input-text input-long-text">
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Description: </span>
+            <div class="flex-column">
+                <textarea id="store-add-description" placeholder="input store description" class="input-text input-long-text input-multi-text"></textarea>
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Email: </span>
+            <div class="flex-column">
+                <input type="text" id="store-add-email" placeholder="input store email address" class="input-text input-long-text">
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal flex-align-center">
+            <span class="label-text">Image: </span>
+            <div class="flex-column">
+                <input type="file" id="store-add-image" accept=".jpg,.jpeg,.png,.webp,.jfif" />
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Category: </span>
+            <div class="flex-column">
+                <select class="input-text input-long-text store-add-category">
+                    <th:block th:each="storeCategory: ${storeCategoryList}">
+                        <option th:if="${storeCategory.title.equals(selectedStoreCategory)}" selected="selected" th:text="${storeCategory.title}" th:value="${storeCategory.categoryId}"></option>
+                        <option th:unless="${storeCategory.title.equals(selectedStoreCategory)}" th:text="${storeCategory.title}" th:value="${storeCategory.categoryId}"></option>
+                    </th:block>
+                </select>
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Address: </span>
+            <div class="flex-column">
+                <textarea id="store-add-address" placeholder="input store address" class="input-text input-long-text input-multi-text"></textarea>
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Geolocation: </span>
+            <div class="flex-column">
+                <input type="text" id="store-add-geolocation" placeholder="input store email geolocation" class="input-text input-long-text">
+            </div>
+        </div>
+        <div class="align-center margin-top-normal">
+            <button class="btn btn-primary btn-middle-long" id="store-add-submit">Submit</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="bg-shadow bg-view-store">
+    <div class="container-view-store">
+        <img class="close-image close-view-panel" src="/img/remove-color.png" />
+        <h3 class="align-center">View Store</h3>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Name: </span>
+            <div class="normal-text store-view-name"></div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Description: </span>
+            <div class="normal-text store-view-description"></div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Email: </span>
+            <div class="normal-text store-view-email"></div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Image: </span>
+            <img class="store-image store-view-image" />
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Category: </span>
+            <div class="normal-text store-view-category"></div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Address: </span>
+            <div class="normal-text store-view-address"></div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Geolocation: </span>
+            <div class="normal-text store-view-geolocation"></div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-shadow bg-edit-store">
+    <div class="container-edit-store">
+        <img class="close-image close-edit-panel" src="/img/remove-color.png" />
+        <h3 class="align-center">Edit Store</h3>
+        <input type="hidden" id="store-edit-store-id">
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Name: </span>
+            <div class="flex-column">
+                <input type="text" id="store-edit-name" placeholder="input store name" class="input-text input-long-text">
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Description: </span>
+            <div class="flex-column">
+                <textarea id="store-edit-description" placeholder="input store description" class="input-text input-long-text input-multi-text"></textarea>
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Email: </span>
+            <div class="flex-column">
+                <input type="text" id="store-edit-email" placeholder="input store email address" class="input-text input-long-text">
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal flex-align-center">
+            <span class="label-text">Image: </span>
+            <div class="flex-column">
+                <input type="file" id="store-edit-image" accept=".jpg,.jpeg,.png,.webp,.jfif" />
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Category: </span>
+            <div class="flex-column">
+                <select class="input-text input-long-text" id="store-edit-category">
+                    <option th:each="storeCategory : ${storeCategoryList}" th:text="${storeCategory.title}" th:value="${storeCategory.categoryId}" />
+                </select>
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Address: </span>
+            <div class="flex-column">
+                <textarea id="store-edit-address" placeholder="input store address" class="input-text input-long-text input-multi-text"></textarea>
+            </div>
+        </div>
+        <div class="flex-row margin-top-normal">
+            <span class="label-text">Geolocation: </span>
+            <div class="flex-column">
+                <input type="text" id="store-edit-geolocation" placeholder="input store email geolocation" class="input-text input-long-text">
+            </div>
+        </div>
+        <div class="align-center margin-top-normal">
+            <button class="btn btn-primary btn-middle-long" id="store-edit-submit">Submit</button>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="/js/jquery-3.7.0.min.js"></script>
+<script type="text/javascript" src="/js/adminStore.js"></script>
+<script type="text/javascript" src="/js/util.js"></script>
+</body>
+</html>
